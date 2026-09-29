@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Painel de Atas — Colegiado do BSI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A4A;
+    --ink-soft:#2E3E60;
+    --paper:#F7F5F0;
+    --paper-2:#EFEBE2;
+    --brass:#A9793D;
+    --brass-soft:#D9B98A;
+    --slate:#5B6B82;
+    --green:#3F7857;
+    --red:#A0453D;
+    --line: rgba(27,42,74,0.14);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#EDE9DD;
+      --ink-soft:#C9CEDB;
+      --paper:#14192A;
+      --paper-2:#1B2236;
+      --brass:#D9B677;
+      --brass-soft:#8A6B3E;
+      --slate:#93A0B8;
+      --green:#7FBF9E;
+      --red:#E08C82;
+      --line: rgba(237,233,221,0.14);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#EDE9DD;
+    --ink-soft:#C9CEDB;
+    --paper:#14192A;
+    --paper-2:#1B2236;
+    --brass:#D9B677;
+    --brass-soft:#8A6B3E;
+    --slate:#93A0B8;
+    --green:#7FBF9E;
+    --red:#E08C82;
+    --line: rgba(237,233,221,0.14);
+  }
+  html{ scroll-padding-top: env(safe-area-inset-top, 0px); height:100%; }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100%;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:980px; margin:0 auto; padding: 40px 24px 80px; }
+
+  header.masthead{
+    border-bottom: 2px solid var(--ink);
+    padding-bottom:22px;
+    margin-bottom: 32px;
+  }
+  .kicker{
+    font-family:'Inter';
+    font-size:12.5px;
+    letter-spacing:0.04em;
+    color:var(--brass);
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-weight:700;
+    font-size:clamp(28px, 4.4vw, 42px);
+    line-height:1.08;
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    color:var(--slate);
+    font-size:15.5px;
+    max-width:64ch;
+    line-height:1.5;
+  }
+
+  /* overview strip */
+  .overview{
+    display:grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap:8px;
+    margin-bottom: 28px;
+  }
+  .ov-item{
+    appearance:none;
+    border:1px solid var(--line);
+    padding:10px 10px 12px;
+    background:var(--paper-2);
+    cursor:pointer;
+    text-align:left;
+    font-family:'Inter';
+    color:var(--ink);
+  }
+  .ov-item .ov-date{
+    font-size:10.5px;
+    color:var(--brass);
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .ov-item .ov-bar{
+    display:flex;
+    height:8px;
+    width:100%;
+    overflow:hidden;
+    margin-bottom:6px;
+  }
+  .ov-item .ov-pct{
+    font-family:'Source Serif 4', serif;
+    font-size:13px;
+    font-weight:600;
+  }
+  .ov-item.active{ border-color:var(--ink); }
+  @media (max-width:760px){
+    .overview{ grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width:420px){
+    .overview{ grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* meeting tabs */
+  .tabs{
+    display:flex;
+    gap:0;
+    margin-bottom:28px;
+    flex-wrap:wrap;
+    border-bottom:1px solid var(--line);
+    padding-bottom: 0;
+    overflow-x:auto;
+  }
+  .tab{
+    appearance:none;
+    border:none;
+    background:transparent;
+    font-family:'Inter';
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--slate);
+    padding:10px 4px;
+    margin-right:20px;
+    cursor:pointer;
+    border-bottom:2.5px solid transparent;
+    transition: color .15s ease, border-color .15s ease;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .tab .n{
+    display:block;
+    font-family:'Source Serif 4', serif;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--brass);
+    margin-bottom:2px;
+  }
+  .tab.active{ color:var(--ink); border-bottom-color:var(--brass); }
+  .tab:hover{ color:var(--ink); }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; animation: fadein .25s ease; }
+  @media (prefers-reduced-motion: reduce){ .panel.active{ animation:none; } }
+  @keyframes fadein{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+  .meta-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:0;
+    border:1px solid var(--line);
+    margin-bottom:26px;
+    background: var(--paper-2);
+  }
+  .meta-cell{
+    padding:16px 18px;
+    border-right:1px solid var(--line);
+  }
+  .meta-cell:last-child{ border-right:none; }
+  .meta-label{
+    font-size:11px;
+    letter-spacing:0.03em;
+    color:var(--slate);
+    margin-bottom:5px;
+  }
+  .meta-value{
+    font-family:'Source Serif 4', serif;
+    font-size:16px;
+    font-weight:600;
+    line-height:1.3;
+  }
+  @media (max-width:640px){
+    .meta-grid{ grid-template-columns:1fr; }
+    .meta-cell{ border-right:none; border-bottom:1px solid var(--line); }
+    .meta-cell:last-child{ border-bottom:none; }
+  }
+
+  .pauta-box{
+    border-left:3px solid var(--brass);
+    padding: 4px 0 4px 16px;
+    margin-bottom:30px;
+    color: var(--ink-soft);
+    font-size:14.5px;
+    line-height:1.55;
+  }
+  .pauta-box strong{ color:var(--ink); }
+
+  section.block{ margin-bottom: 34px; }
+  .block-title{
+    font-family:'Source Serif 4', serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--brass);
+    text-transform:none;
+    margin: 0 0 14px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--line);
+  }
+
+  .topic{
+    padding:18px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .topic:last-child{ border-bottom:none; }
+  .topic-head{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .topic-num{
+    font-family:'Source Serif 4', serif;
+    font-size:13px;
+    color:var(--brass);
+    font-weight:600;
+    flex-shrink:0;
+  }
+  .topic-title{
+    font-family:'Source Serif 4', serif;
+    font-size:18px;
+    font-weight:600;
+    line-height:1.3;
+  }
+  .topic-resumo{
+    font-size:14.5px;
+    line-height:1.62;
+    color:var(--ink-soft);
+    margin: 6px 0 12px;
+    max-width: 74ch;
+  }
+  .subitem{
+    margin: 4px 0 10px 0;
+    font-size:14px;
+    line-height:1.55;
+    color:var(--ink-soft);
+    max-width: 74ch;
+  }
+  .subitem b{ color:var(--ink); }
+  .decisao{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:13.5px;
+    font-weight:600;
+    padding:6px 12px;
+    border:1px solid currentColor;
+  }
+  .decisao.aprovado{ color:var(--green); }
+  .decisao.rejeitado{ color:var(--red); }
+  .decisao.encaminhado{ color:var(--slate); }
+  .decisao .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:currentColor;
+    flex-shrink:0;
+  }
+
+  /* attendance */
+  .att-wrap{
+    border:1px solid var(--line);
+    padding:22px 22px 20px;
+    background:var(--paper-2);
+  }
+  .att-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .att-top .att-title{
+    font-family:'Source Serif 4', serif;
+    font-size:15px;
+    font-weight:600;
+  }
+  .att-top .att-total{
+    font-size:13px;
+    color:var(--slate);
+  }
+  .bar{
+    display:flex;
+    height:28px;
+    width:100%;
+    overflow:hidden;
+    border:1px solid var(--ink);
+  }
+  .seg{ height:100%; }
+  .seg.presente{ background:var(--green); }
+  .seg.justificada{ background:var(--brass-soft); }
+  .seg.ausente{ background:var(--red); opacity:0.75; }
+
+  .legend{
+    display:flex;
+    gap:22px;
+    margin-top:14px;
+    flex-wrap:wrap;
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13.5px;
+  }
+  .legend-swatch{ width:11px; height:11px; flex-shrink:0; }
+  .legend-swatch.presente{ background:var(--green); }
+  .legend-swatch.justificada{ background:var(--brass-soft); }
+  .legend-swatch.ausente{ background:var(--red); opacity:0.75; }
+  .legend-num{ font-family:'Source Serif 4', serif; font-weight:600; color:var(--ink); }
+
+  footer{
+    margin-top:50px;
+    padding-top:18px;
+    border-top:1px solid var(--line);
+    font-size:12.5px;
+    color:var(--slate);
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="kicker">UNIRIO · CCET · Escola de Informática Aplicada</div>
+    <h1>Painel de Atas do Colegiado do BSI</h1>
+    <div class="sub">Alunos: Alana Gorgulho, Isabela Dalmeida, Pedro Henrique Gonçalves, Mylene Ferreira e Victor Hugo Malvão</div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-panel="p1"><span class="n">24 set 2025</span>1ª Ordinária 2025.2</button>
+    <button class="tab" data-panel="p2"><span class="n">06 out 2025</span>1ª Extraordinária 2025.2</button>
+    <button class="tab" data-panel="p3"><span class="n">07 abr 2026</span>1ª Ordinária 2026.1</button>
+    <button class="tab" data-panel="p4"><span class="n">18 mai 2026</span>2ª Ordinária 2026.1</button>
+    <button class="tab" data-panel="p5"><span class="n">16 jun 2026</span>3ª Ordinária 2026.1</button>
+    <button class="tab" data-panel="p6"><span class="n">26 ago 2026</span>1ª Ordinária 2026.2</button>
+  </nav>
+
+  <!-- PAINEL 1 — 24 set 2025 -->
+  <div class="panel active" id="p1">
+    <div class="meta-grid">
+      <div class="meta-cell">
+        <div class="meta-label">Data e hora</div>
+        <div class="meta-value">24 de setembro de 2025, 14h00</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Local</div>
+        <div class="meta-value">Laboratório 1, prédio do CCET</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Presidência</div>
+        <div class="meta-value">Prof. Jobson Massollar</div>
+      </div>
+    </div>
+
+    <div class="pauta-box">
+      <strong>Pauta (6 itens):</strong> alterações em históricos de três discentes; recurso de aproveitamento de disciplina; regime excepcional de aprendizagem; indicação de novo representante discente; nova composição do NDE; nova composição da comissão de matrícula.
+    </div>
+
+    <section class="block">
+      <div class="block-title">Temas discutidos</div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">01</span>
+          <span class="topic-title">Alterações em históricos (3 discentes)</span>
+        </div>
+        <p class="topic-resumo">
+          O prof. Jefferson relatou três pedidos distintos: exclusão de TUT0005 (Tutoria Computação II) do histórico de Matheus Zaiat, por orientação da própria PROGRAD, já que a disciplina impedia seu status de "apto à formatura"; exclusão de uma dispensa de HTD0049 (Fundamentos de Inglês Instrumental) lançada indevidamente pela secretaria de Biblioteconomia no histórico de Lucas Santos, cuja correção depende da PROGRAD; e, para Vanessa Guedes, a exclusão de TIN0133 (Projeto de Graduação II) com trancamento retroativo de 2025.1, pois ela teve que se ausentar por nascimento do bebê e a disciplina, por envolver defesa de TCC, não podia ser cursada remotamente.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>As três solicitações aprovadas por unanimidade</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">02</span>
+          <span class="topic-title">Recurso de aproveitamento de disciplina — APS x IMS (UFRJ)</span>
+        </div>
+        <p class="topic-resumo">
+          A comissão de matrícula havia indeferido o aproveitamento de "Análise e Projeto de Sistemas" (APS) a partir de "Introdução à Modelagem de Sistemas" (IMS), cursada na UFRJ, por entender que a ementa de IMS era mais focada em UML do que em Análise. O discente recorreu ao colegiado alegando semelhança entre as ementas e um precedente de aceitação para outro aluno. O prof. Jefferson defendeu manter a decisão técnica da comissão, para não transformar o colegiado em uma "segunda comissão de matrícula". Os membros compararam as ementas e identificaram pontos em comum, mas também tópicos exclusivos de APS.
+        </p>
+        <span class="decisao rejeitado"><span class="dot"></span>Recurso indeferido — 8 votos contrários, 1 abstenção (profª Adriana Pimenta)</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">03</span>
+          <span class="topic-title">Regime excepcional de aprendizagem — Luís Felipe Claro Rocha</span>
+        </div>
+        <p class="topic-resumo">
+          O discente solicitou regime excepcional por estar se recuperando de cirurgia, sem prazo de alta definido em laudo médico. Os dois professores das disciplinas cursadas em 2025.2 concordaram em ministrá-las remotamente, e a coordenação dispensou a exigência de matrícula mínima em 3 disciplinas.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovado por unanimidade até o fim de 2025.2</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">04</span>
+          <span class="topic-title">Indicação de novo representante discente — Thauan Fabricio da Rocha</span>
+        </div>
+        <p class="topic-resumo">
+          O discente se apresentou motivado por demandas de colegas sobre horário e oferta de matrícula. Os professores Jobson e Jefferson reforçaram a importância da participação discente, e o presidente do CA manifestou interesse em acompanhar as próximas reuniões.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovada por unanimidade</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">05</span>
+          <span class="topic-title">Nova composição do NDE do BSI</span>
+        </div>
+        <p class="topic-resumo">
+          A mudança decorre da eleição do prof. Jefferson para a direção da EIA e do afastamento dos profs. Reinaldo e Paulo Sérgio. Nova composição: prof. Jobson (presidente – ES), prof. Jefferson (Infra), prof. Andreatta (Teoria), prof. Sean (SI), prof. Fabrício (EDI) e profª Adriana Pimenta (Mat).
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovada por unanimidade</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">06</span>
+          <span class="topic-title">Nova composição da comissão de matrícula</span>
+        </div>
+        <p class="topic-resumo">
+          Motivada pela troca de coordenação e pelo afastamento do prof. Pedro. A profª Geiza, após 10 anos na comissão, foi substituída pelo prof. Henrique, diversificando os eixos representados. Nova composição: prof. Jobson (presidente – ES), prof. Jefferson, prof. Andreatta e prof. Henrique.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovada por unanimidade</span>
+      </div>
+    </section>
+
+    <div class="att-wrap">
+      <div class="att-top">
+        <span class="att-title">Presença do Colegiado</span>
+        <span class="att-total">32 membros</span>
+      </div>
+      <div class="bar">
+        <div class="seg presente" style="width:28.1%"></div>
+        <div class="seg justificada" style="width:53.1%"></div>
+        <div class="seg ausente" style="width:18.8%"></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch presente"></span>Presentes — <span class="legend-num">9 (28%)</span></div>
+        <div class="legend-item"><span class="legend-swatch justificada"></span>Ausência justificada — <span class="legend-num">17 (53%)</span></div>
+        <div class="legend-item"><span class="legend-swatch ausente"></span>Ausentes — <span class="legend-num">6 (19%)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL 2 — 06 out 2025 -->
+  <div class="panel" id="p2">
+    <div class="meta-grid">
+      <div class="meta-cell">
+        <div class="meta-label">Data e hora</div>
+        <div class="meta-value">6 de outubro de 2025, 11h40</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Local</div>
+        <div class="meta-value">Remota — Google Meet</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Presidência</div>
+        <div class="meta-value">Prof. Jobson Massollar</div>
+      </div>
+    </div>
+
+    <div class="pauta-box">
+      <strong>Pauta única:</strong> proposta de cooperação da CGC University Mohali, na Índia (relatoria do prof. Jefferson Elbert Simões).
+    </div>
+
+    <section class="block">
+      <div class="block-title">Tema discutido</div>
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">01</span>
+          <span class="topic-title">Cooperação internacional — CGC University Mohali (Índia)</span>
+        </div>
+        <p class="topic-resumo">
+          O prof. Jefferson relatou que a universidade indiana possui cursos com interseção com o BSI e infraestrutura aparentemente boa, segundo material da própria instituição. O prof. Gleison questionou se a aprovação geraria algum compromisso para o BSI. O prof. Jefferson explicou o trâmite: consulta do CRI à decania do CCET e posterior solicitação de aval de um colegiado para elaborar o termo de cooperação. O prof. Jobson complementou que a aprovação do colegiado apenas autoriza a elaboração do termo, e que ações concretas futuras retornariam ao colegiado para discussão.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovada por unanimidade</span>
+      </div>
+    </section>
+
+    <div class="att-wrap">
+      <div class="att-top">
+        <span class="att-title">Presença do Colegiado</span>
+        <span class="att-total">32 membros</span>
+      </div>
+      <div class="bar">
+        <div class="seg presente" style="width:28.1%"></div>
+        <div class="seg justificada" style="width:12.5%"></div>
+        <div class="seg ausente" style="width:59.4%"></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch presente"></span>Presentes — <span class="legend-num">9 (28%)</span></div>
+        <div class="legend-item"><span class="legend-swatch justificada"></span>Ausência justificada — <span class="legend-num">4 (13%)</span></div>
+        <div class="legend-item"><span class="legend-swatch ausente"></span>Ausentes — <span class="legend-num">19 (59%)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL 3 — 07 abr 2026 -->
+  <div class="panel" id="p3">
+    <div class="meta-grid">
+      <div class="meta-cell">
+        <div class="meta-label">Data e hora</div>
+        <div class="meta-value">7 de abril de 2026, 14h30</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Local</div>
+        <div class="meta-value">Sala de Defesas do PPGI-CCET Prof. Astério Tanaka</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Presidência</div>
+        <div class="meta-value">Prof. Jobson Massollar</div>
+      </div>
+    </div>
+
+    <div class="pauta-box">
+      <strong>Pauta (4 itens):</strong> informe do relatório CIAC-BSI (avaliação 2025-2); inclusão de disciplina no histórico de um discente; versão 1 do horário do BSI para 2026.2; solicitação de exclusão de disciplinas de um discente.
+    </div>
+
+    <section class="block">
+      <div class="block-title">Temas discutidos</div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">01</span>
+          <span class="topic-title">Relatório CIAC-BSI — Avaliação de Curso 2025-2</span>
+        </div>
+        <p class="topic-resumo">
+          O prof. Fabrício apresentou o relatório e destacou o volume de abandonos. O prof. Jefferson associou isso ao limite de trancamentos atingido por alunos (trancamentos da pandemia não foram computados). A profª Cristina defendeu entender as causas dos abandonos, e a profª Geiza relacionou desmotivação a reprovações ligadas ao trabalho dos discentes durante o curso. O prof. Fabrício citou indícios de que a empregabilidade não reduz a chance de conclusão. Discutiu-se a criação de monitorias de apoio (listas de exercícios, peer programming), preferencialmente pela manhã, com necessidade de negociar espaço físico com outros cursos.
+        </p>
+        <span class="decisao encaminhado"><span class="dot"></span>Item informativo — sem votação</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">02</span>
+          <span class="topic-title">Inclusão de disciplina no histórico — Breno Kleine Bernstein</span>
+        </div>
+        <p class="topic-resumo">
+          O prof. Reinaldo declarou que o discente executou a atividade de extensão em 2024.2 e 2025.1, mas só chegou a se matricular formalmente em Atividade de Extensão II (TIN0307) em 2025.1. A profª Geiza encaminhou o pedido de inclusão retroativa de TIN0306 (Atividade de Extensão I) com nota 10, já que o aluno concluiu as demais disciplinas e depende dessa inclusão para colar grau.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovada por unanimidade (nota 10,0 em 2024.2)</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">03</span>
+          <span class="topic-title">Versão 1 do horário do BSI para 2026.2</span>
+        </div>
+        <p class="topic-resumo">
+          Em razão do novo calendário da UNIRIO, a coordenação precisou antecipar o envio da demanda de disciplinas e horários aos departamentos. A versão 1 apresentada ainda não contempla slots para optativas nem disciplinas anualizadas do currículo 2008.1.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovada por unanimidade</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">04</span>
+          <span class="topic-title">Exclusão de disciplinas 2025.2 — Matheus Teixeira Gazitua</span>
+        </div>
+        <p class="topic-resumo">
+          O discente solicitou excluir do histórico três disciplinas em que reprovou em 2025.2, alegando dificuldade por luto familiar, tendo sido aprovado em outras três no mesmo período. O prof. Jobson se posicionou contrário, por já haver aprovação em parte das disciplinas e pelo risco de abrir precedente sem norma clara. A profª Geiza e o prof. Felipe concordaram, apontando que o trancamento do semestre completo seria a via cabível — não a exclusão seletiva.
+        </p>
+        <span class="decisao rejeitado"><span class="dot"></span>Rejeitada — 11 votos contrários, 1 abstenção, 0 favoráveis</span>
+      </div>
+    </section>
+
+    <div class="att-wrap">
+      <div class="att-top">
+        <span class="att-title">Presença do Colegiado</span>
+        <span class="att-total">32 membros</span>
+      </div>
+      <div class="bar">
+        <div class="seg presente" style="width:40.6%"></div>
+        <div class="seg justificada" style="width:21.9%"></div>
+        <div class="seg ausente" style="width:37.5%"></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch presente"></span>Presentes — <span class="legend-num">13 (41%)</span></div>
+        <div class="legend-item"><span class="legend-swatch justificada"></span>Ausência justificada — <span class="legend-num">7 (22%)</span></div>
+        <div class="legend-item"><span class="legend-swatch ausente"></span>Ausentes — <span class="legend-num">12 (38%)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL 4 — 18 mai 2026 -->
+  <div class="panel" id="p4">
+    <div class="meta-grid">
+      <div class="meta-cell">
+        <div class="meta-label">Data e hora</div>
+        <div class="meta-value">18 de maio de 2026, 14h25</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Local</div>
+        <div class="meta-value">Sala de Defesas do PPGI-CCET Prof. Astério Tanaka</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Presidência</div>
+        <div class="meta-value">Prof. Jobson Massollar</div>
+      </div>
+    </div>
+
+    <div class="pauta-box">
+      <strong>Pauta (3 itens):</strong> jubilamento por abandono de discentes; participação docente na optativa de preparação para o ENADE 2026; definição de tutorias das turmas 2025.2 e 2026.1.
+    </div>
+
+    <section class="block">
+      <div class="block-title">Temas discutidos</div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">01</span>
+          <span class="topic-title">Jubilamento por abandono (12 discentes)</span>
+        </div>
+        <p class="topic-resumo">
+          O prof. Jefferson relatou que nenhum dos 12 discentes listados apresenta caso que mereça destaque especial, que os telegramas de aviso foram enviados a todos conforme prática da EIA, e que nenhum deles realizou matrícula em 2026.1.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovado por unanimidade</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">02</span>
+          <span class="topic-title">Optativa de preparação para o ENADE 2026</span>
+        </div>
+        <p class="topic-resumo">
+          O prof. Jefferson propôs repetir o modelo de optativa de revisão geral para o ENADE, às sextas-feiras, com cerca de 12 datas antes da prova (29/11/2026). Lembrou que a edição de 2021, feita durante a pandemia, resultou em nota 4 para o curso, e que a expectativa é retornar à nota 5. O prof. Andreatta e o prof. Márcio sugeriram outros dias para aumentar a adesão; a profª Geiza e o prof. Rodrigo reforçaram a importância de conscientizar os alunos, citando provas entregues em branco em edições anteriores. O prof. Jobson propôs levantar o interesse dos docentes, e o prof. Andreatta sugeriu uma enquete com os alunos sobre dia/horário.
+        </p>
+        <span class="decisao encaminhado"><span class="dot"></span>Encaminhado — levantamento com docentes e enquete com discentes</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">03</span>
+          <span class="topic-title">Tutorias das turmas 2025.2 e 2026.1</span>
+        </div>
+        <p class="topic-resumo">
+          Foi apresentada a relação completa de professores-tutores por turma, do período pré-2014.1 até 2025.1. O prof. Andreatta e o prof. Jefferson observaram que os alunos raramente procuram o tutor hoje em dia, e o discente Antonio confirmou nunca ter sido procurado pelo tutor de sua turma. O prof. Márcio associou a queda de procura ao fim da confirmação de matrícula e sugeriu substituir a figura do tutor por uma comissão de professores. O prof. Jefferson defendeu manter o papel por ora e levar a revisão do formato ao NDE, para trazer proposta futura ao colegiado.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Definido — Prof. Jobson (turma 2025.2) e Prof. Rodrigo (turma 2026.1); revisão do formato encaminhada ao NDE</span>
+      </div>
+    </section>
+
+    <div class="att-wrap">
+      <div class="att-top">
+        <span class="att-title">Presença do Colegiado</span>
+        <span class="att-total">32 membros</span>
+      </div>
+      <div class="bar">
+        <div class="seg presente" style="width:34.4%"></div>
+        <div class="seg justificada" style="width:50%"></div>
+        <div class="seg ausente" style="width:15.6%"></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch presente"></span>Presentes — <span class="legend-num">11 (34%)</span></div>
+        <div class="legend-item"><span class="legend-swatch justificada"></span>Ausência justificada — <span class="legend-num">16 (50%)</span></div>
+        <div class="legend-item"><span class="legend-swatch ausente"></span>Ausentes — <span class="legend-num">5 (16%)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL 5 — 16 jun 2026 -->
+  <div class="panel" id="p5">
+    <div class="meta-grid">
+      <div class="meta-cell">
+        <div class="meta-label">Data e hora</div>
+        <div class="meta-value">16 de junho de 2026, 14h47</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Local</div>
+        <div class="meta-value">Sala de Defesas do PPGI-CCET Prof. Astério Tanaka</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Presidência</div>
+        <div class="meta-value">Prof. Jobson Massollar</div>
+      </div>
+    </div>
+
+    <div class="pauta-box">
+      <strong>Pauta (4 itens):</strong> informe sobre o Protocolo para Situações Emergenciais (CONSEPE); oferta de disciplinas da grade 2008/1; horário 2026.2; solicitação de extensão de prazo de TCC de uma discente.
+    </div>
+
+    <section class="block">
+      <div class="block-title">Temas discutidos</div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">01</span>
+          <span class="topic-title">Protocolo para Situações Emergenciais aprovado no CONSEPE</span>
+        </div>
+        <p class="topic-resumo">
+          Divulgação do protocolo normativo e do documento de contribuições, ambos aprovados e assinados pelo Reitor, disponibilizados por link para conhecimento do colegiado.
+        </p>
+        <span class="decisao encaminhado"><span class="dot"></span>Item informativo — sem votação</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">02</span>
+          <span class="topic-title">Oferta de disciplinas da grade 2008/1</span>
+        </div>
+        <p class="topic-resumo">
+          O prof. Jefferson propôs deixar de ofertar regularmente cinco disciplinas anualizadas da grade antiga (Análise Financeira, Estruturas de Dados 2, Estruturas Discretas, Processos de Software e Redes de Computadores 2), já que a maioria dos alunos remanescentes dessa grade já as cursou. A proposta prevê quebra de pré-requisito quando o aluno já tiver cursado a disciplina equivalente anterior, comunicação aos alunos pendentes dois meses antes do fim do período para que solicitem a oferta quando estiverem no penúltimo/último período, e regras de equivalência de ementa para quando as disciplinas forem eventualmente ofertadas.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovada por unanimidade</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">03</span>
+          <span class="topic-title">Horário 2026.2 (obrigatórias + optativas)</span>
+        </div>
+        <p class="topic-resumo">
+          Apresentação da proposta de horário completo para o semestre, via planilha compartilhada.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovado por unanimidade</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">04</span>
+          <span class="topic-title">Extensão de prazo de TCC — Vanessa Guedes da Silva</span>
+        </div>
+        <p class="topic-resumo">
+          O prof. Jobson, orientador da discente, relatou avanços consistentes no TCC ao longo dos encontros semanais, mas sem possibilidade de defesa ainda nesse período, recomendando extensão do prazo. O colegiado sugeriu conceder um ano de extensão.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovada por unanimidade — extensão de 1 ano</span>
+      </div>
+    </section>
+
+    <div class="att-wrap">
+      <div class="att-top">
+        <span class="att-title">Presença do Colegiado</span>
+        <span class="att-total">32 membros</span>
+      </div>
+      <div class="bar">
+        <div class="seg presente" style="width:40.6%"></div>
+        <div class="seg justificada" style="width:28.1%"></div>
+        <div class="seg ausente" style="width:31.3%"></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch presente"></span>Presentes — <span class="legend-num">13 (41%)</span></div>
+        <div class="legend-item"><span class="legend-swatch justificada"></span>Ausência justificada — <span class="legend-num">9 (28%)</span></div>
+        <div class="legend-item"><span class="legend-swatch ausente"></span>Ausentes — <span class="legend-num">10 (31%)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL 6 — 26 ago 2026 -->
+  <div class="panel" id="p6">
+    <div class="meta-grid">
+      <div class="meta-cell">
+        <div class="meta-label">Data e hora</div>
+        <div class="meta-value">26 de agosto de 2026, 14h27</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Local</div>
+        <div class="meta-value">Sala de Defesas do PPGI-CCET Prof. Astério Tanaka</div>
+      </div>
+      <div class="meta-cell">
+        <div class="meta-label">Presidência</div>
+        <div class="meta-value">Prof. Jobson Massollar</div>
+      </div>
+    </div>
+
+    <div class="pauta-box">
+      <strong>Pauta (2 itens):</strong> informes (secretaria unificada, Programa de Acompanhamento Acadêmico, relatório CIAC); inclusão de disciplina no histórico de um discente.
+    </div>
+
+    <section class="block">
+      <div class="block-title">Temas discutidos</div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">01</span>
+          <span class="topic-title">Informes</span>
+        </div>
+        <div class="subitem"><b>a) Secretaria unificada</b> — O prof. Jefferson relatou que a unificação das secretarias acadêmicas de graduação está em discussão no CCET, com tendência de o espaço atual da secretaria do BSI virar a secretaria unificada, liberando uma sala de aula sob gestão de Engenharia de Produção com uso parcial pelo BSI (dois dias por semana). O prof. Sean e a profª Cristina alertaram para o risco de perda desse novo espaço caso o uso não seja formalizado, e questionaram a alocação do técnico-administrativo do PPGI.</div>
+        <div class="subitem"><b>b) Programa de Acompanhamento Acadêmico</b> — Aprovado no CONSEPE, prevê atividades de gestão da vida acadêmica dos discentes em moldes parecidos com o professor-tutor já adotado pelo BSI; a implementação será discutida em próximas reuniões.</div>
+        <div class="subitem"><b>c) Relatório CIAC</b> — O prof. Reinaldo apresentou as estatísticas dos questionários discentes. O prof. Sean e a profª Cristina questionaram os desdobramentos práticos, e o prof. Carlos Eduardo relatou já ter usado esses dados para aprimorar suas aulas. Também foi relatado um episódio de linguagem inadequada de um discente contra um docente, reforçando-se que críticas legítimas de ensino não se confundem com ataques pessoais ou ofensas à saúde mental do docente.</div>
+        <span class="decisao encaminhado"><span class="dot"></span>Itens informativos — sem votação</span>
+      </div>
+
+      <div class="topic">
+        <div class="topic-head">
+          <span class="topic-num">02</span>
+          <span class="topic-title">Inclusão de disciplina no histórico — Gabriel Santana Lima</span>
+        </div>
+        <p class="topic-resumo">
+          O prof. Jobson relatou que o discente, aprovado em concurso da Marinha, precisava comprovar o término do curso antes do previsto. As notas de Atividade de Extensão II e Atividade Complementar já haviam sido lançadas; faltava apenas Projeto de Graduação II (TIN0309), cujo TCC foi defendido em 14/08/2026. Solicitou-se o lançamento da nota no histórico no período de 2026.1 - curso de férias, viabilizando a declaração de conclusão de carga horária e a colação de grau.
+        </p>
+        <span class="decisao aprovado"><span class="dot"></span>Aprovada com 2 abstenções (nota 10,0 em 2026.1 - curso de férias)</span>
+      </div>
+    </section>
+
+    <div class="att-wrap">
+      <div class="att-top">
+        <span class="att-title">Presença do Colegiado</span>
+        <span class="att-total">32 membros</span>
+      </div>
+      <div class="bar">
+        <div class="seg presente" style="width:50%"></div>
+        <div class="seg justificada" style="width:25%"></div>
+        <div class="seg ausente" style="width:25%"></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch presente"></span>Presentes — <span class="legend-num">16 (50%)</span></div>
+        <div class="legend-item"><span class="legend-swatch justificada"></span>Ausência justificada — <span class="legend-num">8 (25%)</span></div>
+        <div class="legend-item"><span class="legend-swatch ausente"></span>Ausentes — <span class="legend-num">8 (25%)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Painel elaborado a partir das atas assinadas: 1ª Reunião Ordinária 2025.2 (24/09/2025), 1ª Reunião Extraordinária 2025.2 (06/10/2025), 1ª Reunião Ordinária 2026.1 (07/04/2026), 2ª Reunião Ordinária 2026.1 (18/05/2026), 3ª Reunião Ordinária 2026.1 (16/06/2026) e 1ª Reunião Ordinária 2026.2 (26/08/2026) do Colegiado do Curso de Bacharelado em Sistemas de Informação — UNIRIO/CCET/EIA. Percentuais calculados sobre o total de 32 membros listados em cada ata.
+  </footer>
+
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const ovItems = document.querySelectorAll('.ov-item');
+  const panels = document.querySelectorAll('.panel');
+
+  function activate(panelId){
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === panelId));
+    ovItems.forEach(o => o.classList.toggle('active', o.dataset.panel === panelId));
+    panels.forEach(p => p.classList.toggle('active', p.id === panelId));
+  }
+
+  tabs.forEach(tab => tab.addEventListener('click', () => activate(tab.dataset.panel)));
+  ovItems.forEach(item => item.addEventListener('click', () => activate(item.dataset.panel)));
+</script>
+</body>
+</html>
